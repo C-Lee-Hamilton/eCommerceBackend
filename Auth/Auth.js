@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import User from "../Models/User.js";
 import Status from "../Models/Status.js";
 import dotenv from "dotenv";
+// const app = express();
 dotenv.config();
 
 const secretKey = process.env.SECRET_KEY;
@@ -163,5 +164,34 @@ router.post(
     }
   }
 );
+
+// leaderboards get expert scores
+router.get("/highscores", async (req, res) => {
+  try {
+    const highscores = await User.find({}, "username highscore")
+      .sort("-highscore")
+      .limit(10);
+    res.json(highscores);
+  } catch (error) {
+    console.error("Error fetching highscores:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+//leaderboards get normal scores
+router.get("/scores", async (req, res) => {
+  try {
+    const normhighscores = await User.find({}, "username score")
+      .sort("-score")
+      .limit(10);
+    res.json(normhighscores);
+  } catch (error) {
+    console.error("Error fetching highscores:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// Your other routes and middleware...
+
+const PORT = process.env.PORT;
 
 export default router;
