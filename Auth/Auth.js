@@ -170,8 +170,36 @@ router.post(
   }
 );
 //add an interest
+router.post("/add-score", passport.authenticate("jwt"), async (req, res) => {
+  try {
+    // Get user ID from the authenticated user object
+    const userId = req.user._id;
+
+    // Get updated information from the request body
+    const updatedScore = req.body.score;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    user.score = updatedScore; // Update the user's image
+    await user.save();
+
+    console.log("User updated:", user);
+    return res.json({ success: true, user: user });
+  } catch (err) {
+    console.error(err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+});
 router.post(
-  "/add-interests",
+  "/add-highscore",
   passport.authenticate("jwt"),
   async (req, res) => {
     try {
@@ -179,7 +207,7 @@ router.post(
       const userId = req.user._id;
 
       // Get updated information from the request body
-      const updatedInterests = req.body.interests;
+      const updatedHighScore = req.body.highscore;
 
       const user = await User.findById(userId);
 
@@ -189,7 +217,7 @@ router.post(
           .json({ success: false, message: "User not found" });
       }
 
-      user.interests = updatedInterests; // Update the user's interests
+      user.highscore = updatedHighScore; // Update the user's image
       await user.save();
 
       console.log("User updated:", user);
@@ -234,29 +262,29 @@ router.post(
 //       .json({ success: false, message: "Internal server error" });
 //   }
 // });
-router.post("/add-status", passport.authenticate("jwt"), async (req, res) => {
-  try {
-    const userId = req.user._id;
-    const { newStatusContent } = req.body;
+// router.post("/add-status", passport.authenticate("jwt"), async (req, res) => {
+//   try {
+//     const userId = req.user._id;
+//     const { newStatusContent } = req.body;
 
-    // Create a new status document associated with the user
-    const newStatus = new Status({
-      ownerId: userId, // Associate the status with the user
-      status: newStatusContent, // Set the statuses field
-    });
+//     // Create a new status document associated with the user
+//     const newStatus = new Status({
+//       ownerId: userId, // Associate the status with the user
+//       status: newStatusContent, // Set the statuses field
+//     });
 
-    // Save the new status document to the database
-    await newStatus.save();
+//     // Save the new status document to the database
+//     await newStatus.save();
 
-    console.log("Status created:", newStatus);
-    return res.json({ success: true, status: newStatus });
-  } catch (err) {
-    console.error(err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
-  }
-});
+//     console.log("Status created:", newStatus);
+//     return res.json({ success: true, status: newStatus });
+//   } catch (err) {
+//     console.error(err);
+//     return res
+//       .status(500)
+//       .json({ success: false, message: "Internal server error" });
+//   }
+// });
 
 router.get(
   "/get-user-statuses",

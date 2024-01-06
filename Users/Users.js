@@ -5,7 +5,7 @@ import User from "../Models/User.js";
 Users.post("/register", function (req, res) {
   const { email, password, username } = req.body;
   User.register(
-    new User({ email: email, username: username }),
+    new User({ email: email, username: username, score: 0, highscore: 0 }),
     password,
     function (err, user) {
       if (err) {
