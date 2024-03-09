@@ -2,16 +2,16 @@ import express from "express";
 import passport from "passport";
 import jwt from "jsonwebtoken";
 import User from "../Models/User.js";
-import Status from "../Models/Status.js";
+import Quiz from "../Models/Quiz.js";
+
 import dotenv from "dotenv";
-// const app = express();
+
 dotenv.config();
 
 const secretKey = process.env.SECRET_KEY;
 
 const router = express.Router();
 
-//login
 router.post("/login", function (req, res) {
   if (!req.body.username) {
     res.json({ success: false, message: "Username was not given" });
@@ -47,7 +47,6 @@ router.post("/login", function (req, res) {
 //logout
 
 router.post("/logout", (req, res, next) => {
-  // Use a callback function for req.logout()
   req.logout((err) => {
     if (err) {
       console.error("Error during logout:", err);
@@ -56,141 +55,104 @@ router.post("/logout", (req, res, next) => {
         .json({ message: "Internal server error during logout." });
     }
 
-    // Clear the login cookie
-    res.clearCookie("loggedIn"); // Make sure this matches the cookie name you set
+    res.clearCookie("loggedIn");
     return res.status(200).json({ message: "Logged out successfully." });
   });
 });
+//
 
-//change password
+//
+// router.post("/add-time", passport.authenticate("jwt"), async (req, res) => {
+//   try {
+//     const userId = req.user._id;
 
-router.post(
-  "/change-password",
-  passport.authenticate("jwt"),
-  async (req, res) => {
-    try {
-      const userId = req.user._id;
-      const oldPassword = req.body.oldPassword;
-      const newPassword = req.body.newPassword;
+//     const updatedTime = req.body.time;
 
-      // Find the user by ID using async/await
-      const user = await User.findById(userId);
+//     const user = await User.findById(userId);
 
-      if (!user) {
-        return res
-          .status(404)
-          .json({ success: false, message: "User not found" });
-      }
+//     if (!user) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "User not found" });
+//     }
 
-      // Use the changePassword method to update the password
-      user.changePassword(oldPassword, newPassword, (err) => {
-        if (err) {
-          return res
-            .status(400)
-            .json({ success: false, message: "Password change failed" });
-        }
-        return res.json({
-          success: true,
-          message: "Password changed successfully",
-        });
-      });
-    } catch (err) {
-      console.error(err);
-      return res
-        .status(500)
-        .json({ success: false, message: "Internal server error" });
-    }
-  }
-);
+//     user.time.push(updatedTime);
+//     await user.save();
 
-//add a score
-router.post("/add-score", passport.authenticate("jwt"), async (req, res) => {
+//     console.log("User updated:", user);
+//     return res.json({ success: true, user: user });
+//   } catch (err) {
+//     console.error(err);
+//     return res
+//       .status(500)
+//       .json({ success: false, message: "Internal server error" });
+//   }
+// });
+
+// router.get(
+//   "/detailed-report",
+//   passport.authenticate("jwt"),
+//   async (req, res) => {
+//     try {
+//       const userId = req.user._id;
+//       const { startDate, endDate } = req.query;
+
+//       const user = await User.findById(userId);
+//       if (!user) {
+//         return res
+//           .status(404)
+//           .json({ success: false, message: "User not found" });
+//       }
+
+//       const start = new Date(startDate);
+//       start.setHours(0, 0, 0, 0);
+//       const end = new Date(endDate);
+//       end.setHours(23, 59, 59, 999);
+//       start.setDate(start.getDate() + 1);
+//       end.setDate(end.getDate() + 1);
+
+//       const filteredEntries = user.time.filter((entry) => {
+//         const entryDateParts = entry.date.split("/");
+//         const entryDate = new Date(
+//           parseInt(entryDateParts[2], 10) + 2000,
+//           parseInt(entryDateParts[0], 10) - 1,
+//           parseInt(entryDateParts[1], 10)
+//         );
+
+//         return entryDate >= start && entryDate <= end;
+//       });
+
+//       const entriesWithDetails = filteredEntries.map((entry) => ({
+//         date: entry.date,
+//         timeWorked: entry.time,
+//         rate: entry.rate,
+//         pay: entry.pay,
+//       }));
+
+//       res.json({ success: true, entries: entriesWithDetails });
+//     } catch (err) {
+//       console.error(err);
+//       return res
+//         .status(500)
+//         .json({ success: false, message: "Internal server error" });
+//     }
+//   }
+// );
+router.get("/my-quiz", async (req, res) => {
+  const { username } = req.body.username;
+
   try {
-    // Get user ID from the authenticated user object
-    const userId = req.user._id;
+    let myQuizzes = await Quiz.find({ username: username });
 
-    // Get updated information from the request body
-    const updatedScore = req.body.score;
+    // const filteredquiz = myQuizzes.map((entry) => ({
+    //   title: entry.title,
+    // }));
 
-    const user = await User.findById(userId);
-
-    if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
-    }
-
-    user.score = updatedScore; // Update the user's image
-    await user.save();
-
-    console.log("User updated:", user);
-    return res.json({ success: true, user: user });
+    res.status(200).json(myQuizzes);
   } catch (err) {
-    console.error(err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    res.status(500).json(err);
   }
 });
-router.post(
-  "/add-highscore",
-  passport.authenticate("jwt"),
-  async (req, res) => {
-    try {
-      // Get user ID from the authenticated user object
-      const userId = req.user._id;
-
-      // Get updated information from the request body
-      const updatedHighScore = req.body.highscore;
-
-      const user = await User.findById(userId);
-
-      if (!user) {
-        return res
-          .status(404)
-          .json({ success: false, message: "User not found" });
-      }
-
-      user.highscore = updatedHighScore; // Update the user's image
-      await user.save();
-
-      console.log("User updated:", user);
-      return res.json({ success: true, user: user });
-    } catch (err) {
-      console.error(err);
-      return res
-        .status(500)
-        .json({ success: false, message: "Internal server error" });
-    }
-  }
-);
-
-// leaderboards get expert scores
-router.get("/highscores", async (req, res) => {
-  try {
-    const highscores = await User.find({}, "username highscore")
-      .sort("-highscore")
-      .limit(10);
-    res.json(highscores);
-  } catch (error) {
-    console.error("Error fetching highscores:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-//leaderboards get normal scores
-router.get("/scores", async (req, res) => {
-  try {
-    const normhighscores = await User.find({}, "username score")
-      .sort("-score")
-      .limit(10);
-    res.json(normhighscores);
-  } catch (error) {
-    console.error("Error fetching highscores:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-// Your other routes and middleware...
 
 const PORT = process.env.PORT;
 

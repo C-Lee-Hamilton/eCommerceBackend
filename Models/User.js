@@ -6,12 +6,9 @@ const Schema = mongoose.Schema;
 var UserSchema = new Schema({
   email: { type: String, unique: true, required: true },
   username: { type: String, unique: true, required: true },
-  score: { type: Number, required: false },
-  highscore: { type: Number, required: false },
-  image: { type: String, required: false },
-  // score: { type: Number, required: false },
+  quizzes: { type: Array, required: false },
 });
 
 UserSchema.plugin(passportLocalMongoose);
 
-export default mongoose.models.User || mongoose.model("SpotUser", UserSchema);
+export default mongoose.models.User || mongoose.model("QuizUser", UserSchema);
