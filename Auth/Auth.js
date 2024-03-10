@@ -139,18 +139,15 @@ router.post("/logout", (req, res, next) => {
 //   }
 // );
 router.get("/my-quiz", async (req, res) => {
-  const { username } = req.body.username;
+  const { username } = req.query;
 
   try {
-    let myQuizzes = await Quiz.find({ username: username });
-
-    // const filteredquiz = myQuizzes.map((entry) => ({
-    //   title: entry.title,
-    // }));
+    let myQuizzes = await Quiz.find({ author: username });
 
     res.status(200).json(myQuizzes);
   } catch (err) {
-    res.status(500).json(err);
+    console.error("Error in /my-quiz route:", err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 

@@ -27,46 +27,44 @@ Users.post("/register", function (req, res) {
   );
 });
 
-Users.get("/my-quiz", async (req, res) => {
-  const { username } = req.body.username;
+// Users.get("/my-quiz", async (req, res) => {
+//   const { username } = req.body.username;
 
+//   try {
+//     let myQuizzes = await Quiz.find({ username: username });
+
+//     // const filteredquiz = myQuizzes.map((entry) => ({
+//     //   title: entry.title,
+//     // }));
+
+//     res.status(200).json(myQuizzes);
+//   } catch (err) {
+//     res.status(500).json(err);
+//   }
+// });
+
+Users.post("/newQuiz", async (req, res) => {
   try {
-    let myQuizzes = await Quiz.find({ username: username });
+    const { title, qArray, username, password } = req.body;
 
-    // const filteredquiz = myQuizzes.map((entry) => ({
-    //   title: entry.title,
-    // }));
+    const newQuiz = new Quiz({ title, author: username, quiz: qArray });
 
-    res.status(200).json(myQuizzes);
-  } catch (err) {
-    res.status(500).json(err);
+    const savedQuiz = await newQuiz.save();
+
+    console.log("Quiz saved successfully:", savedQuiz);
+
+    res.json({
+      success: true,
+      message: "Your quiz has been saved",
+      quiz: savedQuiz,
+    });
+  } catch (error) {
+    console.error("Save error:", error);
+    res.json({
+      success: false,
+      message: "Failed to save quiz. Error: " + error.message,
+    });
   }
-});
-
-Users.post("/newQuiz", function (req, res) {
-  const { newQuiz, username, title, password } = req.body;
-  Quiz.register(
-    new Quiz({ username: username, quiz: newQuiz, title: title }),
-    password,
-
-    function (err, user) {
-      if (err) {
-        console.error("Registration error:", err);
-        res.json({
-          success: false,
-          message: "Failed to save quiz Error: " + err,
-        });
-      } else {
-        console.log("Quiz registered successfully:", user);
-
-        res.json({
-          success: true,
-          message: "Your quiz has been saved",
-          user: user,
-        });
-      }
-    }
-  );
 });
 
 export default Users;

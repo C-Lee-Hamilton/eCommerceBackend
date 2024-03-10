@@ -1,13 +1,11 @@
 import mongoose from "mongoose";
 
-import passportLocalMongoose from "passport-local-mongoose";
 const Schema = mongoose.Schema;
 
 var QuizSchema = new Schema({
-  title: { type: String, unique: true, required: true },
-  username: { type: String, unique: true, required: true },
+  title: { type: String, required: true },
+  author: { type: String, required: false },
   quiz: { type: Array, required: true },
 });
-QuizSchema.plugin(passportLocalMongoose);
-
+QuizSchema.index({ author: 1 }, { unique: false });
 export default mongoose.models.Quiz || mongoose.model("Quizzes", QuizSchema);
