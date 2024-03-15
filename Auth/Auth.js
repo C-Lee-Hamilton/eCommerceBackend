@@ -85,6 +85,30 @@ router.post("/edit-question", async (req, res) => {
   }
 });
 
+router.post("/delete-question", async (req, res) => {
+  try {
+    const { quizId, questionIndex } = req.body;
+    const quiz = await Quiz.findById(quizId);
+    quiz.quiz.splice(questionIndex, 1);
+    const updatedQuiz = await quiz.save();
+    res.status(200).json(updatedQuiz);
+  } catch (error) {
+    console.error("Error deleting question:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.delete("/delete-quiz/", async (req, res) => {
+  try {
+    const { quizId } = req.body;
+    await Quiz.findByIdAndDelete(quizId);
+    res.status(200).json({ message: "Quiz deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting quiz:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 const PORT = process.env.PORT;
 
 export default router;

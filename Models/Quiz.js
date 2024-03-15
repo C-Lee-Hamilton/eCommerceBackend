@@ -7,5 +7,5 @@ var QuizSchema = new Schema({
   author: { type: String, required: false },
   quiz: { type: Array, required: true },
 });
-// QuizSchema.index({ author: 1 }, { unique: false });
+
 export default mongoose.models.Quiz || mongoose.model("Quizzes", QuizSchema);

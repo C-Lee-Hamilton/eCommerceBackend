@@ -66,4 +66,53 @@ Users.post("/edit-quiz-title", async (req, res) => {
   }
 });
 
+Users.delete("/delete-question", async (req, res) => {
+  try {
+    const { quizId, questionIndex } = req.body;
+    const quiz = await Quiz.findById(quizId);
+    quiz.quiz.splice(questionIndex, 1);
+    const updatedQuiz = await quiz.save();
+    res.status(200).json(updatedQuiz);
+  } catch (error) {
+    console.error("Error deleting question:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+Users.delete("/delete-quiz/", async (req, res) => {
+  try {
+    const { quizId } = req.body;
+    await Quiz.findByIdAndDelete(quizId);
+    res.status(200).json({ message: "Quiz deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting quiz:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+Users.post("/add-question", async (req, res) => {
+  try {
+    const { Question, A, B, C, D, Answer, quizIndex } = req.body;
+
+    const quiz = await Quiz.findById(quizIndex);
+
+    const newQuestion = {
+      Question,
+      A,
+      B,
+      C,
+      D,
+      Answer,
+    };
+    quiz.quiz.push(newQuestion);
+
+    const updatedQuiz = await quiz.save();
+
+    res.status(200).json(updatedQuiz);
+  } catch (error) {
+    console.error("Error adding question:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 export default Users;
