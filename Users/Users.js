@@ -27,25 +27,9 @@ Users.post("/register", function (req, res) {
   );
 });
 
-// Users.get("/my-quiz", async (req, res) => {
-//   const { username } = req.body.username;
-
-//   try {
-//     let myQuizzes = await Quiz.find({ username: username });
-
-//     // const filteredquiz = myQuizzes.map((entry) => ({
-//     //   title: entry.title,
-//     // }));
-
-//     res.status(200).json(myQuizzes);
-//   } catch (err) {
-//     res.status(500).json(err);
-//   }
-// });
-
 Users.post("/newQuiz", async (req, res) => {
   try {
-    const { title, qArray, username, password } = req.body;
+    const { title, qArray, username } = req.body;
 
     const newQuiz = new Quiz({ title, author: username, quiz: qArray });
 
@@ -64,6 +48,21 @@ Users.post("/newQuiz", async (req, res) => {
       success: false,
       message: "Failed to save quiz. Error: " + error.message,
     });
+  }
+});
+
+Users.post("/edit-quiz-title", async (req, res) => {
+  try {
+    const { quizId, newTitle } = req.body;
+    const updatedQuiz = await Quiz.findByIdAndUpdate(
+      quizId,
+      { title: newTitle },
+      { new: true }
+    );
+    res.status(200).json(updatedQuiz);
+  } catch (error) {
+    console.error("Error editing quiz title:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 

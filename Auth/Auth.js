@@ -59,85 +59,7 @@ router.post("/logout", (req, res, next) => {
     return res.status(200).json({ message: "Logged out successfully." });
   });
 });
-//
-
-//
-// router.post("/add-time", passport.authenticate("jwt"), async (req, res) => {
-//   try {
-//     const userId = req.user._id;
-
-//     const updatedTime = req.body.time;
-
-//     const user = await User.findById(userId);
-
-//     if (!user) {
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "User not found" });
-//     }
-
-//     user.time.push(updatedTime);
-//     await user.save();
-
-//     console.log("User updated:", user);
-//     return res.json({ success: true, user: user });
-//   } catch (err) {
-//     console.error(err);
-//     return res
-//       .status(500)
-//       .json({ success: false, message: "Internal server error" });
-//   }
-// });
-
-// router.get(
-//   "/detailed-report",
-//   passport.authenticate("jwt"),
-//   async (req, res) => {
-//     try {
-//       const userId = req.user._id;
-//       const { startDate, endDate } = req.query;
-
-//       const user = await User.findById(userId);
-//       if (!user) {
-//         return res
-//           .status(404)
-//           .json({ success: false, message: "User not found" });
-//       }
-
-//       const start = new Date(startDate);
-//       start.setHours(0, 0, 0, 0);
-//       const end = new Date(endDate);
-//       end.setHours(23, 59, 59, 999);
-//       start.setDate(start.getDate() + 1);
-//       end.setDate(end.getDate() + 1);
-
-//       const filteredEntries = user.time.filter((entry) => {
-//         const entryDateParts = entry.date.split("/");
-//         const entryDate = new Date(
-//           parseInt(entryDateParts[2], 10) + 2000,
-//           parseInt(entryDateParts[0], 10) - 1,
-//           parseInt(entryDateParts[1], 10)
-//         );
-
-//         return entryDate >= start && entryDate <= end;
-//       });
-
-//       const entriesWithDetails = filteredEntries.map((entry) => ({
-//         date: entry.date,
-//         timeWorked: entry.time,
-//         rate: entry.rate,
-//         pay: entry.pay,
-//       }));
-
-//       res.json({ success: true, entries: entriesWithDetails });
-//     } catch (err) {
-//       console.error(err);
-//       return res
-//         .status(500)
-//         .json({ success: false, message: "Internal server error" });
-//     }
-//   }
-// );
+//get Quizzes
 router.get("/my-quiz", async (req, res) => {
   const { username } = req.query;
 
@@ -147,6 +69,18 @@ router.get("/my-quiz", async (req, res) => {
     res.status(200).json(myQuizzes);
   } catch (err) {
     console.error("Error in /my-quiz route:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+router.post("/edit-question", async (req, res) => {
+  try {
+    const { quizId, questionIndex, newData } = req.body;
+    const quiz = await Quiz.findById(quizId);
+    quiz.quiz[questionIndex] = newData;
+    const updatedQuiz = await quiz.save();
+    res.status(200).json(updatedQuiz);
+  } catch (error) {
+    console.error("Error editing question:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
