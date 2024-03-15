@@ -29,9 +29,14 @@ Users.post("/register", function (req, res) {
 
 Users.post("/newQuiz", async (req, res) => {
   try {
-    const { title, qArray, username } = req.body;
+    const { title, qArray, username, views } = req.body;
 
-    const newQuiz = new Quiz({ title, author: username, quiz: qArray });
+    const newQuiz = new Quiz({
+      title,
+      author: username,
+      quiz: qArray,
+      views: views,
+    });
 
     const savedQuiz = await newQuiz.save();
 
@@ -111,6 +116,21 @@ Users.post("/add-question", async (req, res) => {
     res.status(200).json(updatedQuiz);
   } catch (error) {
     console.error("Error adding question:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+Users.post("/add-view", async (req, res) => {
+  try {
+    const { quizId, newViews } = req.body;
+    const updatedQuizView = await Quiz.findByIdAndUpdate(
+      quizId,
+      { views: newViews },
+      { new: true }
+    );
+    res.status(200).json(updatedQuizView);
+  } catch (error) {
+    console.error("Error editing quiz title:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });

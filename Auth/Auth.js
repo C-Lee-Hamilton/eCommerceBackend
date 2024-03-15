@@ -59,7 +59,7 @@ router.post("/logout", (req, res, next) => {
     return res.status(200).json({ message: "Logged out successfully." });
   });
 });
-//get Quizzes
+//get user Quizzes
 router.get("/my-quiz", async (req, res) => {
   const { username } = req.query;
 
@@ -72,6 +72,17 @@ router.get("/my-quiz", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+//get Popular Quizzes
+router.get("/pop-quiz", async (req, res) => {
+  try {
+    const popQuizzes = await Quiz.find({}).sort({ views: -1 }).limit(10);
+    res.status(200).json(popQuizzes);
+  } catch (err) {
+    console.error("Error in /my-quiz route:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 router.post("/edit-question", async (req, res) => {
   try {
     const { quizId, questionIndex, newData } = req.body;
@@ -81,30 +92,6 @@ router.post("/edit-question", async (req, res) => {
     res.status(200).json(updatedQuiz);
   } catch (error) {
     console.error("Error editing question:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-router.post("/delete-question", async (req, res) => {
-  try {
-    const { quizId, questionIndex } = req.body;
-    const quiz = await Quiz.findById(quizId);
-    quiz.quiz.splice(questionIndex, 1);
-    const updatedQuiz = await quiz.save();
-    res.status(200).json(updatedQuiz);
-  } catch (error) {
-    console.error("Error deleting question:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-router.delete("/delete-quiz/", async (req, res) => {
-  try {
-    const { quizId } = req.body;
-    await Quiz.findByIdAndDelete(quizId);
-    res.status(200).json({ message: "Quiz deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting quiz:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
