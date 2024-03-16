@@ -82,6 +82,36 @@ router.get("/pop-quiz", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+//search by title
+router.get("/search-title", async (req, res) => {
+  const { title } = req.query;
+
+  try {
+    let titleSearch = await Quiz.find({ title: title });
+
+    res.status(200).json(titleSearch);
+    console.log(title);
+    console.log(titleSearch);
+  } catch (err) {
+    console.error("Error in /my-quiz route:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+//search by Author
+router.get("/search-author", async (req, res) => {
+  const { author } = req.query;
+
+  try {
+    let authorSearch = await Quiz.find({ author: author });
+
+    res.status(200).json(authorSearch);
+    console.log(author);
+    console.log(authorSearch);
+  } catch (err) {
+    console.error("Error in /my-quiz route:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 router.post("/edit-question", async (req, res) => {
   try {
