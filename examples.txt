@@ -1,31 +1,70 @@
-import express from "express";
-const Users = express.Router();
-import User from "../Models/User.js";
-import Quiz from "../Models/Quiz.js";
-Users.post("/register", function (req, res) {
-  const { email, password, username } = req.body;
-  User.register(
-    new User({ email: email, username: username }),
-    password,
-    function (err, user) {
-      if (err) {
-        console.error("Registration error:", err);
-        res.json({
-          success: false,
-          message: "Your account could not be saved. Error: " + err,
-        });
-      } else {
-        console.log("User registered successfully:", user);
+//get user Quizzes
+router.get("/my-quiz", async (req, res) => {
+  const { username } = req.query;
 
-        res.json({
-          success: true,
-          message: "Your account has been saved",
-          user: user,
-        });
-      }
-    }
-  );
+  try {
+    let myQuizzes = await Quiz.find({ author: username });
+
+    res.status(200).json(myQuizzes);
+  } catch (err) {
+    console.error("Error in /my-quiz route:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
+//get Popular Quizzes
+router.get("/pop-quiz", async (req, res) => {
+  try {
+    const popQuizzes = await Quiz.find({}).sort({ views: -1 }).limit(10);
+    res.status(200).json(popQuizzes);
+  } catch (err) {
+    console.error("Error in /my-quiz route:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+//search by title
+router.get("/search-title", async (req, res) => {
+  const { title } = req.query;
+
+  try {
+    let titleSearch = await Quiz.find({ title: title });
+
+    res.status(200).json(titleSearch);
+    console.log(title);
+    console.log(titleSearch);
+  } catch (err) {
+    console.error("Error in /my-quiz route:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+//search by Author
+router.get("/search-author", async (req, res) => {
+  const { author } = req.query;
+
+  try {
+    let authorSearch = await Quiz.find({ author: author });
+
+    res.status(200).json(authorSearch);
+    console.log(author);
+    console.log(authorSearch);
+  } catch (err) {
+    console.error("Error in /my-quiz route:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.post("/edit-question", async (req, res) => {
+  try {
+    const { quizId, questionIndex, newData } = req.body;
+    const quiz = await Quiz.findById(quizId);
+    quiz.quiz[questionIndex] = newData;
+    const updatedQuiz = await quiz.save();
+    res.status(200).json(updatedQuiz);
+  } catch (error) {
+    console.error("Error editing question:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 
 Users.post("/newQuiz", async (req, res) => {
   try {
@@ -134,5 +173,5 @@ Users.post("/add-view", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
-export default Users;
+import User from "../Models/User.js";
+import Quiz from "../Models/Quiz.js";
